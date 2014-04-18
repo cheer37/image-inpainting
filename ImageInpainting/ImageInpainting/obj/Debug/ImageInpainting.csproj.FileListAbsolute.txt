@@ -1,0 +1,1 @@
+C:\Users\Tanya\Documents\Studies\8 сем\Компьютерное зрение (Вахитов)\Проект\SVN\ image-inpainting\ImageInpainting\ImageInpainting\bin\Debug\ImageInpainting.exe.config
