@@ -115,7 +115,6 @@ namespace ImageInpainting
       return deltaI;
     }
 
-    // Inx, Iny
     private static double CalculateDerivative(double[,] img, int x, int y, bool isX, bool isForward)
     {
       double[,] gX = new double[,] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
