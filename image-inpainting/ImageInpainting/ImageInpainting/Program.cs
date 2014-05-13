@@ -115,7 +115,6 @@ namespace ImageInpainting
       return deltaI;
     }
 
-    // isForward - пока без этого
     // Inx, Iny
     private static double CalculateDerivative(double[,] img, int x, int y, bool isX, bool isForward)
     {
@@ -136,11 +135,11 @@ namespace ImageInpainting
 
           if (isX)
           {
-            dX += gX[h, w] * curr;
+            dX += isForward ? gX[h, w] * curr : (-1) * gX[h, w] * curr;
           }
           else
           {
-            dY += gY[h, w] * curr;
+            dY += isForward ? gY[h, w] * curr : (-1) * gY[h, w] * curr;
           }
         }
       }
