@@ -21,7 +21,7 @@ namespace ImageInpainting
       double[,] previousStep = new double[n, m];
       int time = 0;
 
-      while (inpaintingSteps.Count < 2 && IsEqualLastSteps(step, previousStep))
+      while (inpaintingSteps.Count < 2 && !IsEqualLastSteps(step, previousStep))
       {
         step = new double[n, m];
 
@@ -33,7 +33,7 @@ namespace ImageInpainting
           }
         }
 
-        previousStep = step; //
+        previousStep = (double[,]) step.Clone(); 
         time++;
       }
 
@@ -54,6 +54,7 @@ namespace ImageInpainting
       return imgBytes;
     }
 
+    // Load red template
     private static bool[,] LoadTemplate(string templateName)
     {
       string fullPath = Path.GetFullPath(templateName);
