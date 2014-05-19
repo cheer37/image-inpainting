@@ -81,11 +81,34 @@ namespace ImageInpainting
       {
         for (int y = 0; y < bmp.Height; y++)
         {
-          template[y, x] = bmp.GetPixel(x, y).R < 255;
+          template[y, x] = bmp.GetPixel(x, y).R == 0;
         }
       }
       return template;
     }
+
+    public static double[,] Normalisation(double[,] img)
+    {
+      double maxVal = double.MinValue;
+      double minVal = double.MaxValue;
+      img.Select2D(x =>
+      {
+        if (x > maxVal)
+          maxVal = x;
+        if (x<minVal)
+        {
+          minVal = x;
+        }
+        return 0;
+      });
+      double factor = 255/(maxVal - minVal);
+
+      return img.Select2D(x => factor*(x - minVal));
+
+
+    }
+
+
 
     public static Bitmap SaveArrayToBitmap(double[,] data)
     {
