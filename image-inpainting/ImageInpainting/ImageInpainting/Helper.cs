@@ -81,7 +81,7 @@ namespace ImageInpainting
       {
         for (int y = 0; y < bmp.Height; y++)
         {
-          template[y, x] = bmp.GetPixel(x, y).R == 0;
+          template[y, x] = (bmp.GetPixel(x, y).R == 0) && (bmp.GetPixel(x, y).G == 0) && (bmp.GetPixel(x, y).B == 0);
         }
       }
       return template;
@@ -105,11 +105,8 @@ namespace ImageInpainting
 
       return img.Select2D(x => factor*(x - minVal));
 
-
     }
-
-
-
+    
     public static Bitmap SaveArrayToBitmap(double[,] data)
     {
       int x = data.GetLength(1);

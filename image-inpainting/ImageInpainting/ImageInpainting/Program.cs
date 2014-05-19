@@ -12,8 +12,8 @@ namespace ImageInpainting
   {
     public static void Main(string[] args)
     {
-      double[,] image = Helper.LoadImage(@"D:\Source\image-inpainting\circules.PNG");
-      bool[,] isRed = Helper.LoadTemplate(@"D:\Source\image-inpainting\circulesTemplate.PNG");
+      double[,] image = Helper.LoadImage(@"..\..\..\..\1.png");
+      bool[,] isRed = Helper.LoadTemplate(@"..\..\..\..\1.png");
       int xLength = image.GetLength(0); // rename
       int yLength = image.GetLength(1); // rename
 
@@ -33,8 +33,9 @@ namespace ImageInpainting
       {
         previousStep = (double[,])step.Clone();
         factor = CalculateFactor(step);
+        Helper.SaveArrayAndOpen(factor, Path.GetTempPath() + "factor1.png");
         factor = Helper.Normalisation(factor);
-        //Helper.SaveArrayAndOpen(factor, Path.GetTempPath() + "factor.png");
+        Helper.SaveArrayAndOpen(factor, Path.GetTempPath() + "factor.png");
 
         // Helper.SaveArrayAndOpen(step, Path.GetTempPath() + "step.png");
         
