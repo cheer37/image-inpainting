@@ -10,70 +10,25 @@ namespace ImageInpainting
 {
   public class Program
   {
+    private static string pathToSave = @"..\..\..\..\res\";
+    private static string name = "_temp.png";
+
     public static void Main(string[] args)
     {
-      double[,] image = Helper.LoadImage(@"..\..\..\..\1.png");
-      bool[,] isRed = Helper.LoadTemplate(@"..\..\..\..\1.png");
-      int xLength = image.GetLength(0); // rename
-      int yLength = image.GetLength(1); // rename
-
-      List<double[,]> inpaintingSteps = new List<double[,]>();
-      double[,] step = image;
-      double[,] previousStep = image;
-      double[,] factor = new double[xLength, yLength];
       int time = 0;
-
       
-      string name = "_temp.png";
-      inpaintingSteps.Add(image);
-
-      step = step.Select2D((a, x, y) => ((isRed[x, y]) ? 0 : image[x, y]));
-      
-      while ((time <=2 || !IsEqualLastSteps(step, previousStep))&&time<20)
+      while (time<20)
       {
-        previousStep = (double[,])step.Clone();
-        factor = CalculateFactor(step);
-        Helper.SaveArrayAndOpen(factor, Path.GetTempPath() + "factor1.png");
-        factor = Helper.Normalisation(factor);
-        Helper.SaveArrayAndOpen(factor, Path.GetTempPath() + "factor.png");
+        double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
+        bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
 
-        // Helper.SaveArrayAndOpen(step, Path.GetTempPath() + "step.png");
-        
-
-        double sum = 0;
-        factor.Select2D(x => sum += x);
-
-        step = step.Select2D((value, x, y) =>
-        {
-          if (!isRed[x, y])
-          {
-            return value;
-          }
-          double a = value + Constants.DeltaT*factor[x, y];
-          if (a!=0)
-          {
-            isRed[x, y] = false;
-          }
-          if (a > 255)
-          {
-            return 255;
-          }
-          if (a < 0)
-          {
-            return 0;
-          }
-          return a;
-          
-        });
-           
-        
-        inpaintingSteps.Add(step);
-        // Helper.SaveArrayAndOpen(step, Path.GetTempPath() + "step.png");
-        Helper.SaveArrayAndOpen(step, Path.GetTempPath() + time + name);
+        Tuple<bool[,],double[,]> res = InpaintingStep(isTemplate,image);
         time++;
+
+        Helper.SaveArrayAndOpen(res.Item2, @"..\..\..\..\res\" + time + "_res.png");
+        Helper.SaveTemplate(res.Item1,@"..\..\..\..\res\" + time + "_temp.png");
       }
     }
-
 
     private static bool IsEqualLastSteps(double[,] step, double[,] previousStep)
     {
@@ -88,11 +43,53 @@ namespace ImageInpainting
       return true;
     }
 
+    private static Tuple<bool[,],double[,]> InpaintingStep(bool[,] isTemplate, double[,] image)
+    {
+       double[,] step = image.Select2D((a, x, y) => ((isTemplate[x, y]) ? 0 : image[x, y]));
+       double[,] factor = CalculateFactor(step);
+       factor = Helper.Normalisation(factor);
+       double[,] result = step.Select2D((a, x, y) => InpaintingStepOnePixel(a, factor[x, y], isTemplate[x, y]));
+       
+      bool[,] TemplateResult = result.Select2D((value, x, y) =>
+        {
+            if (value != step[x, y] && isTemplate[x, y])// && !isTemplate[x, y+1])
+            {
+              return false;
+            }
+          
+          return isTemplate[x, y];
+        });
+      return new Tuple<bool[,], double[,]>(TemplateResult,result);
+      
+    }
+
+    private static double InpaintingStepOnePixel(double value, double factor, bool template)
+    {
+      //если не надо зарисовывать
+      if (!template)
+      {
+        return value;
+      }
+      //добавляем слой зарисовки
+      double a = value + Constants.DeltaT * factor;
+      if (a > 255)
+      {
+        return 255;
+      }
+      return a;
+    }
+
+    private static double UpdateOnePixel(double value, double factor, bool template)
+    {
+      return 0;
+    }
+
     // формула (6)
     private static double[,] CalculateFactor(double[,] img)
     {
       double[,] newImg = (double[,]) img.Clone();
       double[,] betta = CalculateBeta(newImg);
+
       double[,] deltaI = CalculateDeltaI(newImg, betta);
 
       return betta.Select2D((value, x, y) => value * deltaI[x, y]);
@@ -128,8 +125,7 @@ namespace ImageInpainting
 
       return Math.Sqrt(d_XB * d_XB + d_XF * d_XF + d_YB * d_YB + d_YF * d_YF);
     }
-
-
+    
     private static double[,] CalculateFirstXDerivative(double[,] img, bool IsForward)
     {
       return Helper.Select2D(img, (a, x, y) => CalculateDerivativeX(img, x, y, IsForward));
