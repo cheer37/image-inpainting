@@ -13,7 +13,7 @@ namespace ImageInpainting
     // ?
     public const int Epsilon = 5; // radius of dilation Sigma (red space)
 
-    public static int[,] SobelFilterX = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
-    public static int[,] SobelFilterY = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+    public static int[,] SobelFilterX = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } };
+    public static int[,] SobelFilterY = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
   }
 }

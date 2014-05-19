@@ -17,7 +17,7 @@ namespace ImageInpainting
     {
       int time = 0;
       
-      while (time<20)
+      while (time < 3)
       {
         double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
         bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
