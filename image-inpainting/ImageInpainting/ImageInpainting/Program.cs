@@ -15,30 +15,32 @@ namespace ImageInpainting
 
     public static void Main(string[] args)
     {
-      int time = 0;
-      string iPath = @"..\..\..\..\res\" + time + "_res.png";
-      string tPath = @"..\..\..\..\res\" + time + "_temp.png";
+      string iPath = @"..\..\..\..\res\0_res.png";
+      string tPath = @"..\..\..\..\res\0_temp.png";
       Inpainting inpt = new Inpainting(iPath, tPath);
 
-      //while (time < 3)
-      while (inpt.AreLastStepsEqual())
+      while (inpt.Time < 2 || !inpt.AreLastStepsEqual())
       {
         Console.WriteLine("**** Next");
-        //Console.WriteLine(@"..\..\..\..\res\" + time + "_res.png");
-        //Console.WriteLine(@"..\..\..\..\res\" + time + "_temp.png");
-
-        //double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
-        //bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
-
-        //Tuple<bool[,],double[,]> res = InpaintingStep(isTemplate,image);
         Console.WriteLine("Step {0}", inpt.Time);
         inpt.Next();
-        //time++;
-
-        //Helper.SaveArrayAndOpen(res.Item2, @"..\..\..\..\res\" + time + "_res.png");
-        //Helper.SaveTemplate(res.Item1,@"..\..\..\..\res\" + time + "_temp.png");
       }
+
+      //Helper.SaveArrayAndOpen(inpt.Step, @"..\..\..\..\res\" + inpt.Time + "_res.png");
     }
+
+    //Console.WriteLine(@"..\..\..\..\res\" + time + "_res.png");
+    //Console.WriteLine(@"..\..\..\..\res\" + time + "_temp.png");
+
+    //double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
+    //bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
+
+    //Tuple<bool[,],double[,]> res = InpaintingStep(isTemplate,image);
+
+    //time++;
+
+    //Helper.SaveArrayAndOpen(res.Item2, @"..\..\..\..\res\" + time + "_res.png");
+    //Helper.SaveTemplate(res.Item1,@"..\..\..\..\res\" + time + "_temp.png");
 
     private static bool IsEqualLastSteps(double[,] step, double[,] previousStep)
     {

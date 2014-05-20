@@ -154,25 +154,6 @@ namespace ImageInpainting
 
     }
 
-    public static double NormalizeFactor(double[,] img, double factor)
-    {
-      double maxVal = double.MinValue;
-      double minVal = double.MaxValue;
-      img.Select2D(x =>
-      {
-        if (x > maxVal)
-          maxVal = x;
-        if (x < minVal)
-        {
-          minVal = x;
-        }
-        return 0;
-      });
-
-
-      return (factor - minVal) / (maxVal - minVal) * 255;
-    }
-
     public static double Max2d(double[,] arr)
     {
       double max = double.NegativeInfinity;
@@ -251,7 +232,7 @@ namespace ImageInpainting
     }
 
     // for debug
-    public static void CheckEqual(double[,] arr, string name)
+    public static void WriteAndOpen(double[,] arr, string name)
     {
       string swpath = @"C:\Users\Tanya\Documents\tests_data\inpCheckEqual" + name + ".txt";
       StreamWriter sw = new StreamWriter(swpath);
@@ -266,9 +247,6 @@ namespace ImageInpainting
       }
       sw.Close();
       Process.Start(swpath);
-
-      Console.WriteLine(name);
-      Console.WriteLine("Arr: {0}, {1}", arr.GetLength(0), arr.GetLength(1));
     }
   }
 }

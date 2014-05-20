@@ -8,7 +8,7 @@ namespace ImageInpainting
 {
   internal static class Constants
   {
-    public const double DeltaT = 1; // delta of time
+    public const double DeltaT = 0.1; // delta of time
     
     // Участвует в формуле. Всё.
     public const int Epsilon = 5; // radius of dilation Sigma (red space)
