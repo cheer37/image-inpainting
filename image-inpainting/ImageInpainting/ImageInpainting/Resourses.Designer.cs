@@ -61,6 +61,33 @@ namespace ImageInpainting {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ..\..\Resourses\circules.PNG.
+        /// </summary>
+        internal static string Circules {
+            get {
+                return ResourceManager.GetString("Circules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ..\..\Resourses\circulesIdealResult.PNG.
+        /// </summary>
+        internal static string CirculesIdealResult {
+            get {
+                return ResourceManager.GetString("CirculesIdealResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ..\..\Resourses\circulesTemplate.PNG.
+        /// </summary>
+        internal static string CirculesTemplate {
+            get {
+                return ResourceManager.GetString("CirculesTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ..\..\Resourses\color.png.
         /// </summary>
         internal static string Color {

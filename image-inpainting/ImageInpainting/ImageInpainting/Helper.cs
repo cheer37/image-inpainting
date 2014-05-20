@@ -56,18 +56,29 @@ namespace ImageInpainting
       return result;
     }
 
+    // Load only grayscale image! (now)
     public static double[,] LoadImage(string imageName)
     {
       string fullPath = Path.GetFullPath(imageName);
       Bitmap bmp = new Bitmap(fullPath);
       double[,] imgBytes = new double[bmp.Height, bmp.Width];
-      for (int x = 0; x < bmp.Width; x++)
+      //string swpath = @"C:\Users\Tanya\Documents\tests_data\inpainting1.txt";
+      //StreamWriter sw = new StreamWriter(swpath);
+      for (int x = 0; x < bmp.Height; x++)
       {
-        for (int y = 0; y < bmp.Height; y++)
+        for (int y = 0; y < bmp.Width; y++)
         {
-          imgBytes[y, x] = bmp.GetPixel(x, y).R;
+          imgBytes[x, y] = bmp.GetPixel(y, x).R;
+          //sw.Write(imgBytes[x, y]);
         }
+        //sw.WriteLine();
       }
+      //sw.Close();
+      //Process.Start(swpath);
+
+      //Console.WriteLine("Bmp: height = {0}, width = {1}", bmp.Height, bmp.Width);
+      //Console.WriteLine("Img: height = {0}, width = {1}", imgBytes.GetLength(0), imgBytes.GetLength(1));
+
       return imgBytes;
     }
 
@@ -76,24 +87,34 @@ namespace ImageInpainting
     {
       string fullPath = Path.GetFullPath(templateName);
       Bitmap bmp = new Bitmap(fullPath);
+      //string swpath = @"C:\Users\Tanya\Documents\tests_data\inpainting.txt";
+      // StreamWriter sw = new StreamWriter(swpath);
 
       bool[,] template = new bool[bmp.Height, bmp.Width];
-      for (int x = 0; x < bmp.Width; x++)
+      for (int x = 0; x < bmp.Height; x++)
       {
-        for (int y = 0; y < bmp.Height; y++)
+        for (int y = 0; y < bmp.Width; y++)
         {
-          template[y, x] = (bmp.GetPixel(x, y).R == 0) ;
+          template[x, y] = (bmp.GetPixel(y, x).R == 0);
+          // sw.Write(template[x, y]?1:0);
         }
+        //sw.WriteLine();
       }
+      // sw.Close();
+      //Process.Start(swpath);
+
+      //Console.WriteLine("Bmp: height = {0}, width = {1}", bmp.Height, bmp.Width);
+      //Console.WriteLine("Template: height = {0}, width = {1}", template.GetLength(0), template.GetLength(1));
+
       return template;
     }
-    
+
     public static void SaveTemplate(bool[,] template, string templateName)
     {
-     
+
       int x = template.GetLength(1);
       int y = template.GetLength(0);
-     
+
       var bmp = new Bitmap(x, y);
       template.Select2D((value, row, column) =>
       {
@@ -107,11 +128,9 @@ namespace ImageInpainting
         }
         return value;
       });
-      
+
       bmp.Save(templateName);
     }
-
-    
 
     public static double[,] Normalisation(double[,] img)
     {
@@ -121,7 +140,7 @@ namespace ImageInpainting
       {
         if (x > maxVal)
           maxVal = x;
-        if (x<minVal)
+        if (x < minVal)
         {
           minVal = x;
         }
@@ -129,10 +148,29 @@ namespace ImageInpainting
       });
       minVal = 50000;
       maxVal = 25318199.389405839;
-      double factor = 255/(maxVal - minVal);
+      double factor = 255 / (maxVal - minVal);
 
-      return img.Select2D(x =>((x - minVal) / (maxVal - minVal) * 255));
+      return img.Select2D(x => ((x - minVal) / (maxVal - minVal) * 255));
 
+    }
+
+    public static double NormalizeFactor(double[,] img, double factor)
+    {
+      double maxVal = double.MinValue;
+      double minVal = double.MaxValue;
+      img.Select2D(x =>
+      {
+        if (x > maxVal)
+          maxVal = x;
+        if (x < minVal)
+        {
+          minVal = x;
+        }
+        return 0;
+      });
+
+
+      return (factor - minVal) / (maxVal - minVal) * 255;
     }
 
     public static double Max2d(double[,] arr)
@@ -210,6 +248,27 @@ namespace ImageInpainting
     {
       SaveArrayToBitmapWithoutNorm(data).Save(path);
       Process.Start(path);
+    }
+
+    // for debug
+    public static void CheckEqual(double[,] arr, string name)
+    {
+      string swpath = @"C:\Users\Tanya\Documents\tests_data\inpCheckEqual" + name + ".txt";
+      StreamWriter sw = new StreamWriter(swpath);
+
+      for (int x = 0; x < arr.GetLength(0); x++)
+      {
+        for (int y = 0; y < arr.GetLength(1); y++)
+        {
+          sw.Write(arr[x, y]);
+        }
+        sw.WriteLine();
+      }
+      sw.Close();
+      Process.Start(swpath);
+
+      Console.WriteLine(name);
+      Console.WriteLine("Arr: {0}, {1}", arr.GetLength(0), arr.GetLength(1));
     }
   }
 }

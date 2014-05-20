@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ImageInpainting
+{
+  // Do inpainting step by step
+  public class Inpainting
+  {
+    private double[,] prevStep;
+    private double[,] step;
+    private bool[,] template;
+    private int time;
+
+    public int Time
+    {
+      get { return time; }
+    }
+
+    public Inpainting(string imagePath, string templatePath)
+    {
+      double[,] image = Helper.LoadImage(imagePath);
+      template = Helper.LoadTemplate(templatePath);
+
+      // template area => black area (with value = 0)
+      prevStep = image.Select2D((a, x, y) => ((template[x, y]) ? 0 : image[x, y]));
+      step = (double[,])image.Clone();
+
+      time = 0;
+    }
+
+    public bool AreLastStepsEqual()
+    {
+      for (int x = 0; x < step.GetLength(0); x++)
+      {
+        for (int y = 0; y < step.GetLength(1); y++)
+        {
+          if (step[x, y] != prevStep[x, y])
+          {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Calculate changed values in Sigma area
+    public void Next()
+    {
+      double[,] secondDerivative = DerivativeHelper.CalculateSecondDerivative(prevStep, true);
+      double[,] firstXDerivativeF = DerivativeHelper.CalculateFirstXDerivative(prevStep, true);
+      double[,] firstYDerivativeF = DerivativeHelper.CalculateFirstYDerivative(prevStep, true);
+      double[,] firstXDerivativeB = DerivativeHelper.CalculateFirstXDerivative(prevStep, false);
+      double[,] firstYDerivativeB = DerivativeHelper.CalculateFirstYDerivative(prevStep, false);
+
+      double maxVal = double.MinValue;
+      double minVal = double.MaxValue;
+      prevStep.Select2D(x =>
+      {
+        if (x > maxVal)
+          maxVal = x;
+        if (x < minVal)
+        {
+          minVal = x;
+        }
+        return 0;
+      });
+
+      for (int x = 0; x < prevStep.GetLength(0); x++)
+      {
+        for (int y = 0; y < prevStep.GetLength(1); y++)
+        {
+          if (template[x, y])
+          {
+            double betta = CalculateBeta(prevStep, x, y, firstXDerivativeF, firstYDerivativeF, secondDerivative);
+            double deltaI = CalculateDeltaI(firstXDerivativeB[x, y], firstXDerivativeF[x, y], firstYDerivativeB[x, y], firstYDerivativeF[x, y], betta > 0);
+            double factor = betta * deltaI;
+            // ! normalize
+            factor = (factor - minVal) / (maxVal - minVal) * 255;
+
+            if (step[x, y] + Constants.DeltaT * factor > 255 || step[x, y] + Constants.DeltaT * factor < 0)
+            {
+              Console.WriteLine("Alarm");
+            }
+
+            step[x, y] += Constants.DeltaT * factor;
+          }
+        }
+      }
+
+      time++;
+      Helper.CheckEqual(step, "Step " + time);
+    }
+
+    private double CalculateBeta(double[,] img, int x, int y, double[,] firstXDerivative, double[,] firstYDerivative, double[,] secondDerivative)
+    {
+      Tuple<double, double> a = CalulateDirectionOfSecondDerivative(img, x, y, secondDerivative);
+      Tuple<double, double> b = CalculateN(img, x, y, firstXDerivative, firstYDerivative);
+      return a.Item1 * b.Item1 + a.Item2 * b.Item2;
+    }
+
+    private Tuple<double, double> CalulateDirectionOfSecondDerivative(double[,] img, int x, int y, double[,] secondDerivative)
+    {
+      if (x < 1 || y < 1 || x >= img.GetLength(0) - 1 || y >= img.GetLength(1) - 1)
+      {
+        return new Tuple<double, double>(0, 0);
+      }
+
+      double i = secondDerivative[x + 1, y] - secondDerivative[x - 1, y];
+      double j = secondDerivative[x, y + 1] - secondDerivative[x, y - 1];
+      return new Tuple<double, double>(i, j); ;
+    }
+
+    private Tuple<double, double> CalculateN(double[,] img, int x, int y, double[,] firstXDerivative, double[,] firstYDerivative)
+    {
+      double denominator = Math.Sqrt(firstXDerivative[x, y] * firstXDerivative[x, y] + firstYDerivative[x, y] * firstYDerivative[x, y]);
+      double i = -1 * firstYDerivative[x, y] / denominator;
+      double j = firstXDerivative[x, y] / denominator;
+      return new Tuple<double, double>(i, j);
+    }
+
+    private double CalculateDeltaI(double d_XB, double d_XF, double d_YB, double d_YF, bool condition)
+    {
+      if (condition)
+      {
+        d_XB = Math.Min(d_XB, 0);
+        d_XF = Math.Max(d_XF, 0);
+        d_YB = Math.Min(d_YB, 0);
+        d_YF = Math.Max(d_YF, 0);
+      }
+      else
+      {
+        d_XB = Math.Max(d_XB, 0);
+        d_XF = Math.Min(d_XF, 0);
+        d_YB = Math.Max(d_YB, 0);
+        d_YF = Math.Min(d_YF, 0);
+      }
+
+      return Math.Sqrt(d_XB * d_XB + d_XF * d_XF + d_YB * d_YB + d_YF * d_YF);
+    }
+  }
+}

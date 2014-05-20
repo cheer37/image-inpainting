@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Circules" xml:space="preserve">
+    <value>..\..\Resourses\circules.PNG</value>
+  </data>
+  <data name="CirculesIdealResult" xml:space="preserve">
+    <value>..\..\Resourses\circulesIdealResult.PNG</value>
+  </data>
+  <data name="CirculesTemplate" xml:space="preserve">
+    <value>..\..\Resourses\circulesTemplate.PNG</value>
+  </data>
   <data name="Color" xml:space="preserve">
     <value>..\..\Resourses\color.png</value>
   </data>

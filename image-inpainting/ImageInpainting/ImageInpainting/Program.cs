@@ -16,17 +16,27 @@ namespace ImageInpainting
     public static void Main(string[] args)
     {
       int time = 0;
-      
-      while (time < 3)
+      string iPath = @"..\..\..\..\res\" + time + "_res.png";
+      string tPath = @"..\..\..\..\res\" + time + "_temp.png";
+      Inpainting inpt = new Inpainting(iPath, tPath);
+
+      //while (time < 3)
+      while (inpt.AreLastStepsEqual())
       {
-        double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
-        bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
+        Console.WriteLine("**** Next");
+        //Console.WriteLine(@"..\..\..\..\res\" + time + "_res.png");
+        //Console.WriteLine(@"..\..\..\..\res\" + time + "_temp.png");
 
-        Tuple<bool[,],double[,]> res = InpaintingStep(isTemplate,image);
-        time++;
+        //double[,] image = Helper.LoadImage(@"..\..\..\..\res\"+ time +"_res.png");
+        //bool[,] isTemplate = Helper.LoadTemplate(@"..\..\..\..\res\" + time + "_temp.png");
 
-        Helper.SaveArrayAndOpen(res.Item2, @"..\..\..\..\res\" + time + "_res.png");
-        Helper.SaveTemplate(res.Item1,@"..\..\..\..\res\" + time + "_temp.png");
+        //Tuple<bool[,],double[,]> res = InpaintingStep(isTemplate,image);
+        Console.WriteLine("Step {0}", inpt.Time);
+        inpt.Next();
+        //time++;
+
+        //Helper.SaveArrayAndOpen(res.Item2, @"..\..\..\..\res\" + time + "_res.png");
+        //Helper.SaveTemplate(res.Item1,@"..\..\..\..\res\" + time + "_temp.png");
       }
     }
 
@@ -43,24 +53,24 @@ namespace ImageInpainting
       return true;
     }
 
-    private static Tuple<bool[,],double[,]> InpaintingStep(bool[,] isTemplate, double[,] image)
+    private static Tuple<bool[,], double[,]> InpaintingStep(bool[,] isTemplate, double[,] image)
     {
-       double[,] step = image.Select2D((a, x, y) => ((isTemplate[x, y]) ? 0 : image[x, y]));
-       double[,] factor = CalculateFactor(step);
-       factor = Helper.Normalisation(factor);
-       double[,] result = step.Select2D((a, x, y) => InpaintingStepOnePixel(a, factor[x, y], isTemplate[x, y]));
-       
+      double[,] step = image.Select2D((a, x, y) => ((isTemplate[x, y]) ? 0 : image[x, y]));
+      double[,] factor = CalculateFactor(step);
+      factor = Helper.Normalisation(factor);
+      double[,] result = step.Select2D((a, x, y) => InpaintingStepOnePixel(a, factor[x, y], isTemplate[x, y]));
+
       bool[,] TemplateResult = result.Select2D((value, x, y) =>
         {
-            if (value != step[x, y] && isTemplate[x, y])// && !isTemplate[x, y+1])
-            {
-              return false;
-            }
-          
+          if (value != step[x, y] && isTemplate[x, y])// && !isTemplate[x, y+1])
+          {
+            return false;
+          }
+
           return isTemplate[x, y];
         });
-      return new Tuple<bool[,], double[,]>(TemplateResult,result);
-      
+      return new Tuple<bool[,], double[,]>(TemplateResult, result);
+
     }
 
     private static double InpaintingStepOnePixel(double value, double factor, bool template)
@@ -87,7 +97,7 @@ namespace ImageInpainting
     // формула (6)
     private static double[,] CalculateFactor(double[,] img)
     {
-      double[,] newImg = (double[,]) img.Clone();
+      double[,] newImg = (double[,])img.Clone();
       double[,] betta = CalculateBeta(newImg);
 
       double[,] deltaI = CalculateDeltaI(newImg, betta);
@@ -125,7 +135,7 @@ namespace ImageInpainting
 
       return Math.Sqrt(d_XB * d_XB + d_XF * d_XF + d_YB * d_YB + d_YF * d_YF);
     }
-    
+
     private static double[,] CalculateFirstXDerivative(double[,] img, bool IsForward)
     {
       return Helper.Select2D(img, (a, x, y) => CalculateDerivativeX(img, x, y, IsForward));
@@ -206,13 +216,13 @@ namespace ImageInpainting
       double[,] xDerivative = CalculateFirstXDerivative(img, true);
       double[,] yDerivative = CalculateFirstYDerivative(img, true);
 
-      double[,] denominator = xDerivative.Select2D((a,x,y) => Math.Sqrt(x*x + yDerivative[x,y]*yDerivative[x,y] + Constants.Epsilon));
+      double[,] denominator = xDerivative.Select2D((a, x, y) => Math.Sqrt(x * x + yDerivative[x, y] * yDerivative[x, y] + Constants.Epsilon));
 
       Tuple<double, double>[,] res = new Tuple<double, double>[img.GetLength(0), img.GetLength(1)];
 
       res = res.Select2D((a, x, y) =>
       {
-        double i = -yDerivative[x,y]/denominator[x,y];
+        double i = -yDerivative[x, y] / denominator[x, y];
         double j = xDerivative[x, y] / denominator[x, y];
         Tuple<double, double> newTuple = new Tuple<double, double>(i, j);
         return newTuple;
@@ -225,8 +235,8 @@ namespace ImageInpainting
     {
       Tuple<double, double>[,] a = CalulateDirectionOfSecondDerivative(img);
       Tuple<double, double>[,] b = CalulateN(img);
-      double[,] res = new double[img.GetLength(0),img.GetLength(1)];
-      res = res.Select2D((z, x, y) => a[x, y].Item1*b[x, y].Item1 + a[x, y].Item2*b[x, y].Item2);
+      double[,] res = new double[img.GetLength(0), img.GetLength(1)];
+      res = res.Select2D((z, x, y) => a[x, y].Item1 * b[x, y].Item1 + a[x, y].Item2 * b[x, y].Item2);
       return res;
     }
 

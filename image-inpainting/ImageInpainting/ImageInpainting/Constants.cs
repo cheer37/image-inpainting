@@ -10,7 +10,7 @@ namespace ImageInpainting
   {
     public const double DeltaT = 1; // delta of time
     
-    // ?
+    // Участвует в формуле. Всё.
     public const int Epsilon = 5; // radius of dilation Sigma (red space)
 
     public static int[,] SobelFilterX = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } };

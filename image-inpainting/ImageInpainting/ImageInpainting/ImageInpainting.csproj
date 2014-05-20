@@ -43,7 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="DerivativeHelper.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Inpainting.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resourses.Designer.cs">
@@ -56,6 +58,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resourses\circules.PNG" />
+    <Content Include="Resourses\circulesIdealResult.PNG" />
+    <Content Include="Resourses\circulesTemplate.PNG" />
     <Content Include="Resourses\color.png" />
     <Content Include="Resourses\colorTemplate.png" />
     <Content Include="Resourses\grayscale.png" />
