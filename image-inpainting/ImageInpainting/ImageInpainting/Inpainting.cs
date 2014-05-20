@@ -61,7 +61,9 @@ namespace ImageInpainting
       double[,] firstYDerivativeF = DerivativeHelper.CalculateFirstYDerivative(prevStep, true);
       double[,] firstXDerivativeB = DerivativeHelper.CalculateFirstXDerivative(prevStep, false);
       double[,] firstYDerivativeB = DerivativeHelper.CalculateFirstYDerivative(prevStep, false);
+      double[,] factorAll = new double[step.GetLength(0), step.GetLength(1)];
       double betta, deltaI, factor;
+      double min = Double.MaxValue, max = Double.MinValue;
 
       for (int x = 0; x < prevStep.GetLength(0); x++)
       {
@@ -72,16 +74,45 @@ namespace ImageInpainting
             betta = CalculateBeta(prevStep, x, y, firstXDerivativeF, firstYDerivativeF, secondDerivative);
             deltaI = CalculateDeltaI(firstXDerivativeB[x, y], firstXDerivativeF[x, y], firstYDerivativeB[x, y], firstYDerivativeF[x, y], betta > 0);
             factor = betta * deltaI;
-            step[x, y] += Constants.DeltaT * factor;
+            factorAll[x, y] = Constants.DeltaT * factor;
+
+            if (factor < min)
+            {
+              min = factor;
+            }
+
+            if (factor > max)
+            {
+              max = factor;
+            }
+
+            //step[x, y] += Constants.DeltaT * factor;
           }
         }
       }
 
-      NormalizeStep();
+      factorAll = NormalizeFactor(factorAll, min, max);
+
+      for (int x = 0; x < prevStep.GetLength(0); x++)
+      {
+        for (int y = 0; y < prevStep.GetLength(1); y++)
+        {
+          if (template[x, y])
+          {
+            step[x, y] += factorAll[x, y];
+            if (step[x, y] > 255.0)
+            {
+              step[x, y] = 255; //
+            }
+          }
+        }
+      }
+
+      //NormalizeStep();
       time++;
 
       Helper.SaveArrayAndOpen(step, @"..\..\..\..\res\" + time + "_res.png");
-      //Helper.WriteAndOpen(step, "Step " + time);
+      ////Helper.WriteAndOpen(step, "Step " + time);
     }
 
     // How to do..?
@@ -117,6 +148,25 @@ namespace ImageInpainting
           }
           return value;
         });
+    }
+
+    private double[,] NormalizeFactor(double[,] factor, double min, double max)
+    {
+      double coefficient;
+
+      for (int x = 0; x < factor.GetLength(0); x++)
+      {
+        for (int y = 0; y < factor.GetLength(1); y++)
+        {
+          if (template[x, y])
+          {
+            coefficient = 1.0 * Math.Ceiling((factor[x, y] - min) / (max - min) * 100) / 100;
+            factor[x, y] = 255 * coefficient;
+          }
+        }
+      }
+
+      return factor;
     }
 
     private double CalculateBeta(double[,] img, int x, int y, double[,] firstXDerivative, double[,] firstYDerivative, double[,] secondDerivative)
