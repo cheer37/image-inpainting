@@ -38,6 +38,23 @@ namespace ImageInpainting
 
     public bool AreLastStepsEqual()
     {
+      bool templateIsEmpty = true;
+
+      template.Select2D(x =>
+        {
+          if (x)
+          {
+            templateIsEmpty = false;
+          }
+
+          return true;
+        });
+
+      if (templateIsEmpty)
+      {
+        return true;
+      }
+
       for (int x = 0; x < step.GetLength(0); x++)
       {
         for (int y = 0; y < step.GetLength(1); y++)
@@ -99,10 +116,22 @@ namespace ImageInpainting
         {
           if (template[x, y])
           {
+
+            if (step[x, y] + factorAll[x, y] == prevStep[x, y] && prevStep[x, y] != 0)
+            {
+              template[x, y] = false;
+              continue;
+            }
+
             step[x, y] += factorAll[x, y];
             if (step[x, y] > 255.0)
             {
               step[x, y] = 255; //
+            }
+
+            if (step[x, y] < 0.0)
+            {
+              step[x, y] = 0; //
             }
           }
         }
@@ -115,7 +144,7 @@ namespace ImageInpainting
       ////Helper.WriteAndOpen(step, "Step " + time);
     }
 
-    // How to do..?
+    // Not used
     private void NormalizeStep()
     {
       double maxVal = double.MinValue;
